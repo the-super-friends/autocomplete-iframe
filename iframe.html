@@ -1,0 +1,14 @@
+<!doctype html>
+<div id="clickable" style="width: 300px; height: 100px; border: 1px solid black; cursor:pointer; -moz-user-select:none">
+  click me! clicked <span id="click-count">0</span> times
+</div>
+<script>
+window.onload = function domReady() {
+  var clickable = document.getElementById('clickable');
+  var counter = document.getElementById('click-count');
+  clickable.addEventListener('click', function(e) {
+    var count = parseInt(counter.textContent, 10);
+    counter.textContent = count + 1;
+  });
+};
+</script>
