@@ -1,14 +1,55 @@
 <!doctype html>
 <div id="clickable" style="width: 300px; height: 100px; border: 1px solid black; cursor:pointer; -moz-user-select:none">
-  click me! clicked <span id="click-count">0</span> times
+  click me! clicked <span id="clickCount">0</span> times
 </div>
+
+<p>We want to send messages to chrome and get them echoed back via WebChannel.
+<p>Click this button to send a message, then you should see a response inserted
+   into the list of responses below the button.
+<button id="sendMessage">click to send a message to chrome</button>
+<p>Response count is <span id="responseCount">0</span>.
+<p>Echoed responses from chrome will be listed below.
+<ol id="responses">
+  <li>nothin</li>
+</ol>
+
 <script>
 window.onload = function domReady() {
+  // click counter - used to convince ourselves that the iframe is getting the clicks
   var clickable = document.getElementById('clickable');
-  var counter = document.getElementById('click-count');
+  var counter = document.getElementById('clickCount');
   clickable.addEventListener('click', function(e) {
     var count = parseInt(counter.textContent, 10);
     counter.textContent = count + 1;
   });
+
+  // communicate with browser chrome using WebChannel.jsm:
+  // https://developer.mozilla.org/Mozilla/JavaScript_code_modules/WebChannel.jsm
+
+  // listen for events coming from chrome
+  window.addEventListener('WebChannelMessageToContent', function(e) {
+    // prepend the latest message + timestamp to the response list
+    var responses = document.getElementById('responses');
+    responses.innerHTML = '<li>' + new Date() + ': ' + e.detail + '</li>' + responses.innerHTML;
+
+    // increment response counter
+    var responseCount = document.getElementById('responseCount');
+    var count = parseInt(responseCount.textContent, 10);
+    responseCount.textContent = count + 1;
+  });
+
+  // on button click, send a message to chrome
+  var btn = document.getElementById('sendMessage');
+  btn.addEventListener('click', function(e) {
+    window.dispatchEvent(new window.CustomEvent('WebChannelMessageToChrome', {
+      detail: {
+        id: 'ohai', // NOTE: 'ohai' is the channel ID that's shared across chrome + browser
+        message: {
+          stuff: 'things'
+        }
+      }
+    }));
+  });
+
 };
 </script>
