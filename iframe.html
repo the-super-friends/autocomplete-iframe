@@ -13,6 +13,9 @@
   <li>nothin</li>
 </ol>
 
+<p>How about some regular old autocomplete response instead?</p>
+<ol id="results"></ol>
+
 <script>
 window.onload = function domReady() {
   // click counter - used to convince ourselves that the iframe is getting the clicks
@@ -29,14 +32,28 @@ window.onload = function domReady() {
   // listen for events coming from chrome
   window.addEventListener('WebChannelMessageToContent', function(e) {
     console.log('message from chrome received in iframed page: ' + JSON.stringify(e.detail));
-    // prepend the latest message + timestamp to the response list
-    var responses = document.getElementById('responses');
-    responses.innerHTML = '<li>' + new Date() + ': ' + e.detail + '</li>' + responses.innerHTML;
+    if (e.detail.message.type == 'autocomplete-search-results') {
+      // ok, we got this list of results. render em.
+      var resultsContainer = document.getElementById('results');
+      var resultsText = '';
+      e.detail.message.data.forEach(function(result) {
+        resultsText += '<li class="result">' +
+                         '<h3>' + result.title + '</h3>' + 
+                         '<p>' + result.url + '</p>' +
+                         '<p><em>' + result.text + '</em></p></li>';
+      });
+      resultsContainer.innerHTML = resultsText;
+    } else {
+      // this is our old goofing around stuff.
+      // prepend the latest message + timestamp to the response list
+      var responses = document.getElementById('responses');
+      responses.innerHTML = '<li>' + new Date() + ': ' + JSON.stringify(e.detail) + '</li>' + responses.innerHTML;
 
-    // increment response counter
-    var responseCount = document.getElementById('responseCount');
-    var count = parseInt(responseCount.textContent, 10);
-    responseCount.textContent = count + 1;
+      // increment response counter
+      var responseCount = document.getElementById('responseCount');
+      var count = parseInt(responseCount.textContent, 10);
+      responseCount.textContent = count + 1;
+    }
   });
 
   // on button click, send a message to chrome
