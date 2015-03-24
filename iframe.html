@@ -30,12 +30,26 @@ window.onload = function domReady() {
       var resultsContainer = document.getElementById('results');
       var resultsText = '';
       e.detail.message.data.forEach(function(result) {
-        resultsText += '<li style="list-style-type:none" class="result">' +
+        resultsText += '<li style="list-style-type:none" class="result" data-url="' + result.url + '">' +
                          '<p>' + result.title + '</p>' + 
                          '<p class="url">' + result.url + '</p></li>';
       });
       resultsContainer.innerHTML = resultsText;
     }
+  });
+
+  window.addEventListener('click', function onClick(e) {
+    if (!e.target.classList.contains('result')) { return; }
+    var selectedUrl = e.target.dataset.url;
+    window.dispatchEvent(new window.CustomEvent('WebChannelMessageToChrome', {
+      detail: {
+        id: 'ohai',
+        message: {
+          type: 'autocomplete-url-clicked',
+          url: selectedUrl
+        }
+      }
+    }));
   });
 
 };
