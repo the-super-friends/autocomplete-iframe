@@ -28,6 +28,7 @@ window.onload = function domReady() {
 
   // listen for events coming from chrome
   window.addEventListener('WebChannelMessageToContent', function(e) {
+    console.log('message from chrome received in iframed page: ' + JSON.stringify(e.detail));
     // prepend the latest message + timestamp to the response list
     var responses = document.getElementById('responses');
     responses.innerHTML = '<li>' + new Date() + ': ' + e.detail + '</li>' + responses.innerHTML;
