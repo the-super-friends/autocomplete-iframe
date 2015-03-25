@@ -38,9 +38,10 @@ window.onload = function domReady() {
     }
   });
 
-  window.addEventListener('click', function onClick(e) {
-    if (!e.target.classList.contains('result')) { return; }
-    var selectedUrl = e.target.dataset.url;
+  var clickHandler = function(e) {
+    // target will either be <li> or one of its direct descendants
+    var selectedUrl = e.target.dataset.url || e.target.parentNode.dataset.url; // cheap but works
+    console.log('the selectedUrl is ' + selectedUrl);
     window.dispatchEvent(new window.CustomEvent('WebChannelMessageToChrome', {
       detail: {
         id: 'ohai',
@@ -50,7 +51,9 @@ window.onload = function domReady() {
         }
       }
     }));
-  });
+  };
 
+  var list = document.getElementById('results');
+  list.addEventListener('click', clickHandler); 
 };
 </script>
