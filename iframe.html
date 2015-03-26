@@ -20,12 +20,19 @@ ol, li, p {
 }
 </style>
 <ol id="results"></ol>
+
+search suggestions (not clickable just yet):
+<ol id="suggestions"></ol>
 <script>
 window.onload = function domReady() {
   // listen for events coming from chrome
   window.addEventListener('WebChannelMessageToContent', function(e) {
     console.log('message from chrome received in iframed page: ' + JSON.stringify(e.detail));
-    if (e.detail.message && e.detail.message.type == 'autocomplete-search-results') {
+    if (!e.detail.message) {
+      console.log('empty message from chrome, wtfbbq, giving up');
+      return;
+    }
+    if (e.detail.message.type == 'autocomplete-search-results') {
       // ok, we got this list of results. render em.
       var resultsContainer = document.getElementById('results');
       var resultsText = '';
@@ -35,6 +42,20 @@ window.onload = function domReady() {
                          '<p class="url">' + result.url + '</p></li>';
       });
       resultsContainer.innerHTML = resultsText;
+    } else if (e.detail.message.type == 'suggested-search-results') {
+      // let's show some suggested search results!
+      // copying the approach of the other case to keep life simple
+      console.log('got a suggested-search-results response!');
+      var suggestionsContainer  = document.getElementById('suggestions');
+      var suggestionsText = '';
+      // TODO figure out how clicking on this might work
+      if (e.detail.message.data.remote.length) {
+        suggestionsText += '<li>' + e.detail.message.data.remote.join(', ') + '</li>';
+      }
+      if (e.detail.message.data.local.length) {
+        suggestionsText += '<li>' + e.detail.message.data.local.join(', ') + '</li>';
+      }
+      suggestionsContainer.innerHTML = suggestionsText;
     }
   });
 
